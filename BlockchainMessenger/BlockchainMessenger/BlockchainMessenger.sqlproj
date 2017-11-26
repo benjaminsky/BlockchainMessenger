@@ -61,6 +61,7 @@
     <Folder Include="Tables" />
     <Folder Include="Stored Procedures" />
     <Folder Include="Sequences" />
+    <Folder Include="Functions" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\Message.sql" />
@@ -70,6 +71,7 @@
     <Build Include="Sequences\MessageID.sql" />
     <Build Include="Stored Procedures\MessageAdd.sql" />
     <Build Include="Stored Procedures\MessageMarkRead.sql" />
+    <Build Include="Functions\MessageComputeHash.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="BlockchainMessenger.localdb.publish.xml" />
