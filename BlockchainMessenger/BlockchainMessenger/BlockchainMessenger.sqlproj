@@ -62,6 +62,8 @@
     <Folder Include="Stored Procedures" />
     <Folder Include="Sequences" />
     <Folder Include="Functions" />
+    <Folder Include="Post Deploy" />
+    <Folder Include="Post Deploy\LookupTables" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\Message.sql" />
@@ -72,8 +74,17 @@
     <Build Include="Stored Procedures\MessageAdd.sql" />
     <Build Include="Stored Procedures\MessageMarkRead.sql" />
     <Build Include="Functions\MessageComputeHash.sql" />
+    <Build Include="Tables\Transaction.sql" />
+    <Build Include="Sequences\TransactionID.sql" />
+    <Build Include="Tables\TransactionType.sql" />
+    <Build Include="Functions\MessageReadComputeHash.sql" />
+    <Build Include="Stored Procedures\MessageMarkUnread.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="BlockchainMessenger.localdb.publish.xml" />
+    <None Include="Post Deploy\LookupTables\LookupData.TransactionType.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="Post Deploy\Script.PostDeployment.sql" />
   </ItemGroup>
 </Project>

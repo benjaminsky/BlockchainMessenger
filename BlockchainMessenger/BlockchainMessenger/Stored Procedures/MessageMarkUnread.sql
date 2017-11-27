@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[MessageMarkRead]
+﻿CREATE PROCEDURE [dbo].[MessageMarkUnread]
 	@MessageID INT
 AS
 SET XACT_ABORT ON
@@ -8,8 +8,7 @@ DECLARE @TransactionHash BINARY(32)
 	,@PrevTransactionID INT
 	,@PrevTransactionHash BINARY(32)
 	,@HashVersion INT = 1 --Just hardcoding for now...
-	,@ReadDateTime DATETIMEOFFSET(2) = SYSDATETIMEOFFSET()
-	
+	,@TransactionDateTime DATETIMEOFFSET(2) = SYSDATETIMEOFFSET()
 BEGIN TRAN
 	SELECT TOP 1
 		 @PrevTransactionID = TransactionID
@@ -19,15 +18,15 @@ BEGIN TRAN
 
 	SET @TransactionHash = dbo.MessageReadComputeHash(
 		@MessageID
-		,@ReadDateTime
+		,@TransactionDateTime
 		,@PrevTransactionHash
 		,@HashVersion)
 
 	/* INSERT/UPDATE */
 	UPDATE [Message]
-	SET ReadDateTime = @ReadDateTime
+	SET ReadDateTime = NULL
 	WHERE MessageID = @MessageID
 
 	INSERT INTO dbo.[Transaction] (TransactionTypeID, MessageID,TransactionHash,HashVersion,PrevTransactionID,PrevTransactionHash, TransactionDateTime)
-	VALUES (2,@MessageID,@TransactionHash,@HashVersion,@PrevTransactionID, @PrevTransactionHash, @ReadDateTime)
+	VALUES (3,@MessageID,@TransactionHash,@HashVersion,@PrevTransactionID, @PrevTransactionHash, @TransactionDateTime)
 COMMIT

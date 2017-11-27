@@ -8,6 +8,7 @@ CREATE FUNCTION [dbo].[MessageComputeHash]
 	,@ToUserID INT
 	,@Subject NVARCHAR(100)
 	,@Body NVARCHAR(1000)
+	,@TransactionDateTime DATETIMEOFFSET(2)
 	,@PrevMessageHash BINARY(32)
 	,@HashVersion INT
 )
@@ -24,6 +25,16 @@ BEGIN
 					+ @Delimiter + CAST(@ToUserID AS NVARCHAR(10))
 					+ @Delimiter + REPLACE(@Subject,@Delimiter,'')
 					+ @Delimiter + REPLACE(@Body,@Delimiter,'')
+					+ @Delimiter + ISNULL(CONVERT(NVARCHAR(66),@PrevMessageHash,1),'')
+					)
+				WHEN 2 THEN
+					HASHBYTES('SHA2_256',
+					CAST(@MessageID AS NVARCHAR(10))
+					+ @Delimiter + CAST(@FromUserID AS NVARCHAR(10))
+					+ @Delimiter + CAST(@ToUserID AS NVARCHAR(10))
+					+ @Delimiter + REPLACE(@Subject,@Delimiter,'')
+					+ @Delimiter + REPLACE(@Body,@Delimiter,'')
+					+ @Delimiter + ISNULL(CONVERT(NVARCHAR(30),@TransactionDateTime,121),'')
 					+ @Delimiter + ISNULL(CONVERT(NVARCHAR(66),@PrevMessageHash,1),'')
 					)
 			END 
