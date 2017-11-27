@@ -1,7 +1,7 @@
 ﻿/****************
 I know scalar functions are generally poor performers in SQL Server. For this demo they make readability better
 *****************/
-CREATE FUNCTION [dbo].[BlockComputeSignature]
+CREATE FUNCTION [dbo].BlockVerifySignature
 (
 	@BlockID INT
 	,@PrevBlockID INT
@@ -11,12 +11,13 @@ CREATE FUNCTION [dbo].[BlockComputeSignature]
 	,@PrevBlockSignature VARBINARY(256)
 	,@CreatedDateTime DATETIMEOFFSET(2)
 	,@SignatureVersion INT
+	,@SignatureToVerify VARBINARY(256)
 )
-RETURNS VARBINARY(256)
+RETURNS BIT
 AS
 BEGIN
-	RETURN CAST(	
-		SignByCert(Cert_Id('BlockChainCert'),
+	RETURN CAST(
+		VerifySignedByCert(Cert_Id('BlockChainCert'),
 			dbo.BlockPlaintextForSignature(
 				@BlockID
 				,@PrevBlockID
@@ -25,8 +26,7 @@ BEGIN
 				,@MerkleRoot
 				,@PrevBlockSignature
 				,@CreatedDateTime
-				,@SignatureVersion
-			)
-		)
-		as VARBINARY(256))
+				,@SignatureVersion)
+			,@SignatureToVerify
+		) AS BIT)
 END

@@ -89,6 +89,11 @@
     <Build Include="Stored Procedures\TransactionCreateMerkleTree.sql" />
     <Build Include="Functions\BlockComputeSignature.sql" />
     <Build Include="Stored Procedures\StartFromScratch.sql" />
+    <Build Include="Tables\MerkleTreeIntermediateNode.sql" />
+    <Build Include="Sequences\MerkleTreeIntermediateNodeID.sql" />
+    <Build Include="Functions\BlockPlaintextForSignature.sql" />
+    <Build Include="Functions\BlockVerifySignature.sql" />
+    <Build Include="Stored Procedures\TransactionVerify.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="BlockchainMessenger.localdb.publish.xml" />

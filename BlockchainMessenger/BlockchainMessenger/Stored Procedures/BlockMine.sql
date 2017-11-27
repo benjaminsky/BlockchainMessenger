@@ -19,10 +19,10 @@ WHERE BlockSignature IS NULL
 DECLARE @Signature VARBINARY(256) = 0xFFFF
 	, @Nonce INT = 0
 
-WHILE CAST(LEFT(@Signature,2) AS BINARY(2)) > 0x000F
+WHILE CAST(LEFT(@Signature,2) AS BINARY(2)) > 0x0FFF
 BEGIN
-	SET @Signature = [dbo].[BlockComputeSignature] (@BlockID, @PrevBlockID, @TransactionCount, @Nonce, @MerkleRoot, @PrevBlockSignature, @CreatedDateTime, 1)
 	SET @Nonce = CAST(CRYPT_GEN_RANDOM(4) as INT)
+	SET @Signature = [dbo].[BlockComputeSignature] (@BlockID, @PrevBlockID, @TransactionCount, @Nonce, @MerkleRoot, @PrevBlockSignature, @CreatedDateTime, 1)
 END
 
 UPDATE dbo.[Block]
