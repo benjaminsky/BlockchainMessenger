@@ -1,12 +1,5 @@
-/* clear */
-DELETE [Transaction]
-DELETE [Message]
-DELETE [User]
-
-ALTER SEQUENCE dbo.MessageID RESTART
-ALTER SEQUENCE dbo.UserID RESTART
-ALTER SEQUENCE dbo.TransactionID RESTART
-
+/* delete all data */
+EXEC [dbo].[StartFromScratch]
 
 /* create users */
 DECLARE @UserID INT
@@ -32,9 +25,44 @@ EXEC @MessageID = [dbo].[MessageAdd] 1001,1000,'RE: RE: RE: Hey','Please!'
 WAITFOR DELAY '00:00:00.300'
 EXEC MessageMarkUnread @MessageID = 10002
 WAITFOR DELAY '00:00:00.300'
+EXEC MessageMarkRead @MessageID = 10003
+WAITFOR DELAY '00:00:00.300'
 
 select * from [User]
 select * from [Message]
 select * from [Transaction]
+SELECT * FROM [Block]
 
-SELECT HASHBYTES('SHA2_256',N'10000<bcfield>2017-11-26 17:24:01.40 -08:00<bcfield>2017-11-26 17:24:01.40 -08:00<bcfield>0x412632EA5D535712AD71648EB5048ED6A882819D428F59AF7957422CD469C854')
+EXEC BlockAdd
+EXEC BlockMine
+
+/* create messages */
+EXEC  [dbo].[MessageAdd] 1000,1001,'Hey','Hey Alice! How are you?'
+WAITFOR DELAY '00:00:00.300'
+EXEC  [dbo].[MessageAdd] 1000,1001,'Hey','Hey Alice! How are you?'
+WAITFOR DELAY '00:00:00.300'
+EXEC  [dbo].[MessageAdd] 1000,1001,'Hey','Hey Alice! How are you?'
+WAITFOR DELAY '00:00:00.300'
+EXEC  [dbo].[MessageAdd] 1000,1001,'Hey','Hey Alice! How are you?'
+WAITFOR DELAY '00:00:00.300'
+EXEC  [dbo].[MessageAdd] 1000,1001,'Hey','Hey Alice! How are you?'
+WAITFOR DELAY '00:00:00.300'
+EXEC  [dbo].[MessageAdd] 1000,1001,'Hey','Hey Alice! How are you?'
+WAITFOR DELAY '00:00:00.300'
+EXEC  [dbo].[MessageAdd] 1000,1001,'Hey','Hey Alice! How are you?'
+WAITFOR DELAY '00:00:00.300'
+EXEC  [dbo].[MessageAdd] 1000,1001,'Hey','Ooof, sorry for the spam. I accidentally kept sending that...'
+WAITFOR DELAY '00:00:00.300'
+EXEC  [dbo].[MessageAdd] 1001,1000,'RE: Hey','Not a problem Bob. I''ve just added you to my junk mail list ;)'
+
+EXEC BlockAdd
+EXEC BlockMine
+
+
+EXEC  [dbo].[MessageAdd] 1000,1001,'Followup','Schema docs have been updated.'
+WAITFOR DELAY '00:00:00.300'
+EXEC  [dbo].[MessageAdd] 1001,1000,'RE: Followup','Thanks! Enjoy your weekend.'
+WAITFOR DELAY '00:00:00.300'
+
+EXEC BlockAdd
+EXEC BlockMine

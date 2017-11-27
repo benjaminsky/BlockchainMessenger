@@ -19,7 +19,7 @@ ELSE
 DECLARE @TransactionHash BINARY(32) 
 	,@PrevTransactionID INT
 	,@PrevTransactionHash BINARY(32)
-	,@HashVersion INT = 2 --Just hardcoding for now...
+	,@HashVersion INT = 1 --Just hardcoding for now...
 	,@TransactionDateTime DATETIMEOFFSET(2) = SYSDATETIMEOFFSET()
 
 BEGIN TRAN
@@ -36,15 +36,14 @@ BEGIN TRAN
 		,@Subject
 		,@Body
 		,@TransactionDateTime
-		,@PrevTransactionHash
 		,@HashVersion)
 
 	/* INSERT and RETURN */
 	INSERT INTO dbo.[Message] (MessageID, ToUserID,FromUserID, [Subject], Body)
 	VALUES (@InternalMessageID, @ToUserID,@FromUserID,@Subject, @Body)
 
-	INSERT INTO dbo.[Transaction] (TransactionTypeID, MessageID,TransactionHash,HashVersion,PrevTransactionID,PrevTransactionHash, TransactionDateTime)
-	VALUES (1,@InternalMessageID,@TransactionHash,@HashVersion,@PrevTransactionID, @PrevTransactionHash, @TransactionDateTime)
+	INSERT INTO dbo.[Transaction] (TransactionTypeID, MessageID,TransactionHash, HashVersion, TransactionDateTime)
+	VALUES (1,@InternalMessageID,@TransactionHash, @HashVersion, @TransactionDateTime)
 COMMIT
 
 RETURN @InternalMessageID

@@ -5,7 +5,6 @@ CREATE FUNCTION [dbo].[MessageReadComputeHash]
 (
 	@MessageID INT
 	,@TransactionDateTime DATETIMEOFFSET(2)
-	,@PrevMessageHash BINARY(32)
 	,@HashVersion INT
 )
 RETURNS BINARY(32)
@@ -17,8 +16,7 @@ BEGIN
 				WHEN 1 THEN
 					HASHBYTES('SHA2_256',
 					CAST(@MessageID AS NVARCHAR(10))
-					+ @Delimiter + ISNULL(CONVERT(NVARCHAR(30),@TransactionDateTime,121),'')
-					+ @Delimiter + ISNULL(CONVERT(NVARCHAR(66),@PrevMessageHash,1),'')
+					+ @Delimiter + ISNULL(CONVERT(NVARCHAR(30),@TransactionDateTime,121),N'')
 					)
 			END 
 		as BINARY(32))

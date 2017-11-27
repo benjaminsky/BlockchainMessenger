@@ -9,6 +9,7 @@ DECLARE @TransactionHash BINARY(32)
 	,@PrevTransactionHash BINARY(32)
 	,@HashVersion INT = 1 --Just hardcoding for now...
 	,@TransactionDateTime DATETIMEOFFSET(2) = SYSDATETIMEOFFSET()
+
 BEGIN TRAN
 	SELECT TOP 1
 		 @PrevTransactionID = TransactionID
@@ -19,7 +20,6 @@ BEGIN TRAN
 	SET @TransactionHash = dbo.MessageReadComputeHash(
 		@MessageID
 		,@TransactionDateTime
-		,@PrevTransactionHash
 		,@HashVersion)
 
 	/* INSERT/UPDATE */
@@ -27,6 +27,6 @@ BEGIN TRAN
 	SET ReadDateTime = NULL
 	WHERE MessageID = @MessageID
 
-	INSERT INTO dbo.[Transaction] (TransactionTypeID, MessageID,TransactionHash,HashVersion,PrevTransactionID,PrevTransactionHash, TransactionDateTime)
-	VALUES (3,@MessageID,@TransactionHash,@HashVersion,@PrevTransactionID, @PrevTransactionHash, @TransactionDateTime)
+	INSERT INTO dbo.[Transaction] (TransactionTypeID, MessageID,TransactionHash,HashVersion, TransactionDateTime)
+	VALUES (3,@MessageID,@TransactionHash,@HashVersion, @TransactionDateTime)
 COMMIT

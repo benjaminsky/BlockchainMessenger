@@ -5,6 +5,7 @@ MERGE INTO [dbo].[TransactionType] as t
         VALUES(1,'Message Send')
              ,(2,'Message Mark Read')
              ,(3,'Message Mark Unread')
+			 ,(4,'Merkle Node')
              /* Enter Additional Data Here */
     ) s ([TransactionTypeID],[TransactionTypeDesc])
         ON t.[TransactionTypeID] = s.[TransactionTypeID]

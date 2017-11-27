@@ -8,7 +8,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{4aae4282-8f68-4a1f-b531-46c62409edaa}</ProjectGuid>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.SqlAzureV12DatabaseSchemaProvider</DSP>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql130DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
@@ -64,6 +64,7 @@
     <Folder Include="Functions" />
     <Folder Include="Post Deploy" />
     <Folder Include="Post Deploy\LookupTables" />
+    <Folder Include="Security" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\Message.sql" />
@@ -79,6 +80,15 @@
     <Build Include="Tables\TransactionType.sql" />
     <Build Include="Functions\MessageReadComputeHash.sql" />
     <Build Include="Stored Procedures\MessageMarkUnread.sql" />
+    <Build Include="Tables\Block.sql" />
+    <Build Include="Sequences\BlockID.sql" />
+    <Build Include="Security\BlockChainCert.sql" />
+    <Build Include="Stored Procedures\BlockAdd.sql" />
+    <Build Include="Security\MasterKey.sql" />
+    <Build Include="Stored Procedures\BlockMine.sql" />
+    <Build Include="Stored Procedures\TransactionCreateMerkleTree.sql" />
+    <Build Include="Functions\BlockComputeSignature.sql" />
+    <Build Include="Stored Procedures\StartFromScratch.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="BlockchainMessenger.localdb.publish.xml" />

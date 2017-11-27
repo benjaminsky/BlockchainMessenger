@@ -20,14 +20,13 @@ BEGIN TRAN
 	SET @TransactionHash = dbo.MessageReadComputeHash(
 		@MessageID
 		,@ReadDateTime
-		,@PrevTransactionHash
 		,@HashVersion)
 
 	/* INSERT/UPDATE */
 	UPDATE [Message]
 	SET ReadDateTime = @ReadDateTime
 	WHERE MessageID = @MessageID
-
-	INSERT INTO dbo.[Transaction] (TransactionTypeID, MessageID,TransactionHash,HashVersion,PrevTransactionID,PrevTransactionHash, TransactionDateTime)
-	VALUES (2,@MessageID,@TransactionHash,@HashVersion,@PrevTransactionID, @PrevTransactionHash, @ReadDateTime)
+	
+	INSERT INTO dbo.[Transaction] (TransactionTypeID, MessageID,TransactionHash,HashVersion, TransactionDateTime)
+	VALUES (2,@MessageID,@TransactionHash,@HashVersion, @ReadDateTime)
 COMMIT
