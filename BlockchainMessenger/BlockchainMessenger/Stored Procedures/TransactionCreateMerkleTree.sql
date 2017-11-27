@@ -41,3 +41,4 @@ SELECT 4,NodeHash, SYSDATETIMEOFFSET(), @BlockID, @HashVersion
 FROM @MerkleNodes
 WHERE Depth >= 1 --Ditch the original transactions
 	AND ID <> @MerkleRootID
+ORDER BY ID --Order matters. We're using the PK order to determine position in the merkle tree during verification

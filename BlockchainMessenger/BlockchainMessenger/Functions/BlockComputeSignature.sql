@@ -20,10 +20,10 @@ BEGIN
 			CASE @SignatureVersion
 				WHEN 1 THEN
 					SignByCert(Cert_Id('BlockChainCert'),
-					CAST(@BlockID AS NVARCHAR(10))
-					+ @Delimiter + ISNULL(CAST(@PrevBlockID AS NVARCHAR(10)),N'')
-					+ @Delimiter + CAST(@TransactionCount AS NVARCHAR(10))
-					+ @Delimiter + CAST(@Nonce AS NVARCHAR(10))
+					CAST(@BlockID AS NVARCHAR(11))
+					+ @Delimiter + ISNULL(CAST(@PrevBlockID AS NVARCHAR(11)),N'')
+					+ @Delimiter + CAST(@TransactionCount AS NVARCHAR(11))
+					+ @Delimiter + CAST(@Nonce AS NVARCHAR(11))
 					+ @Delimiter + ISNULL(CONVERT(NVARCHAR(66),@MerkleRoot,1),N'')
 					+ @Delimiter + ISNULL(CONVERT(NVARCHAR(514),@PrevBlockSignature,1),N'')
 					+ @Delimiter + ISNULL(CONVERT(NVARCHAR(30),@CreatedDateTime,121),N'')

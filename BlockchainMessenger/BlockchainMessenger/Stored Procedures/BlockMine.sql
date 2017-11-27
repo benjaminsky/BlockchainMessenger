@@ -16,13 +16,13 @@ SELECT TOP 1 @BlockID = BlockID
 FROM dbo.[Block] b
 WHERE BlockSignature IS NULL
 
-DECLARE @Signature VARBINARY(256) = 0xFF
+DECLARE @Signature VARBINARY(256) = 0xFFFF
 	, @Nonce INT = 0
 
-WHILE CAST(LEFT(@Signature,1) AS BINARY(1)) <> 0x00
+WHILE CAST(LEFT(@Signature,2) AS BINARY(2)) > 0x000F
 BEGIN
 	SET @Signature = [dbo].[BlockComputeSignature] (@BlockID, @PrevBlockID, @TransactionCount, @Nonce, @MerkleRoot, @PrevBlockSignature, @CreatedDateTime, 1)
-	SET @Nonce = @Nonce + 1
+	SET @Nonce = CAST(CRYPT_GEN_RANDOM(4) as INT)
 END
 
 UPDATE dbo.[Block]
