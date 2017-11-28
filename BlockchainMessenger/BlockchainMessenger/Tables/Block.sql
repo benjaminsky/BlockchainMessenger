@@ -5,6 +5,7 @@
 	,TransactionCount INT NULL
 	,MerkleRoot BINARY(32) NULL
 	,Nonce INT NULL
+	,Difficulty VARBINARY(4) NULL
 	,BlockSignature VARBINARY(256) NULL
 	,SignatureVersion INT NOT NULL
 	,PrevBlockSignature VARBINARY(256) NULL

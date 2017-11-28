@@ -3,97 +3,74 @@
 	@TransactionID INT
 )
 AS
-DECLARE @BlockID INT 
-SELECT @BlockID = BlockID
-FROM [Transaction] 
-WHERE TransactionID = @TransactionID
+DECLARE @NextNodeID INT
+	,@Hash1 BINARY(32)
+	,@Hash2 BINARY(32)
+	,@NodeHash BINARY(32)
+	,@HashFailures INT = 0
+	,@IsDone BIT = 0
+	,@IsValid BIT = 0
+	,@Exists BIT = 1
 
-DECLARE @ComputedMerkleRoot BINARY(32) 
-
-;WITH CTENecessaryNodes as (
-	--Sibling Transaction
-	SELECT MerkleTreeIntermediateNodeID
-		,MerkleTreeIntermediateNodeID1
-		,MerkleTreeIntermediateNodeID2
-		,TransactionID1
-		,TransactionID2
-		,CASE WHEN TransactionID1 = @TransactionID THEN 1 ELSE 2 END AS ComputeSide
-		,NonComputeSideHash = t.TransactionHash
-		,Depth
-	FROM dbo.MerkleTreeIntermediateNode m
-	JOIN dbo.[Transaction] t on t.TransactionID = CASE WHEN m.TransactionID1 = @TransactionID THEN m.TransactionID2 WHEN m.TransactionID2 = @TransactionID THEN m.TransactionID1 END
-	WHERE m.BlockID = @BlockID
-
-	UNION ALL
-
-	--Walk down the tree
-	SELECT m.MerkleTreeIntermediateNodeID
-		,m.MerkleTreeIntermediateNodeID1
-		,m.MerkleTreeIntermediateNodeID2
-		,NULL
-		,NULL
-		,CASE WHEN m.MerkleTreeIntermediateNodeID1 = c.MerkleTreeIntermediateNodeID THEN 1 ELSE 2 END
-		,NonComputeSideHash = mh.NodeHash
-		,m.Depth
-	FROM CTENecessaryNodes c
-	JOIN dbo.MerkleTreeIntermediateNode m on m.MerkleTreeIntermediateNodeID1 = c.MerkleTreeIntermediateNodeID 
-		or m.MerkleTreeIntermediateNodeID2 = c.MerkleTreeIntermediateNodeID
-	JOIN dbo.MerkleTreeIntermediateNode mh 
-		on mh.MerkleTreeIntermediateNodeID = CASE 
-			WHEN m.MerkleTreeIntermediateNodeID1 = c.MerkleTreeIntermediateNodeID THEN m.MerkleTreeIntermediateNodeID2 
-			ELSE m.MerkleTreeIntermediateNodeID1 
-			END
-	WHERE m.BlockID = @BlockID
-		and mh.BlockID = @BlockID
+--Verify transaction and sibling transaction
+;WITH CTEMessageHash as (
+	select TransactionID
+		,CAST(CASE 
+				WHEN t.TransactionTypeID = 1 
+					THEN dbo.MessageComputeHash(ms.MessageID,ms.FromUserID,ms.ToUserID,ms.[Subject], ms.Body, t.TransactionDateTime, t.HashVersion) 
+				WHEN t.TransactionTypeID in (2,3)
+					THEN dbo.MessageReadComputeHash(ms.MessageID,t.TransactionDateTime,t.HashVersion)
+			END AS BINARY(32)) as ComputedHash
+	FROM dbo.[Transaction] t 
+	JOIN dbo.[Message] ms on ms.MessageID = t.MessageID
 )
-, CTEComputedHashes as (
-	--Compute Transaction Hash
-	select c.MerkleTreeIntermediateNodeID
-		,c.MerkleTreeIntermediateNodeID1
-		,c.MerkleTreeIntermediateNodeID2
-		,c.TransactionID1
-		,c.TransactionID2
-		,c.ComputeSide
-		,c.NonComputeSideHash
-		,c.Depth
-		,ComputedHash = CAST(CASE 
-			WHEN t.TransactionTypeID = 1 
-				THEN dbo.MessageComputeHash(ms.MessageID,ms.FromUserID,ms.ToUserID,ms.Subject, ms.Body, t.TransactionDateTime, t.HashVersion) 
-			WHEN t.TransactionTypeID in (2,3)
-				THEN dbo.MessageReadComputeHash(ms.MessageID,t.TransactionDateTime,t.HashVersion)
-		END AS BINARY(32))
-	from CTENecessaryNodes c
-	LEFT JOIN dbo.[Transaction] t on t.TransactionID = CASE WHEN TransactionID1 IS NOT NULL THEN CASE ComputeSide WHEN 1 THEN c.TransactionID1 ELSE c.TransactionID2 END END 
-	LEFT JOIN dbo.[Message] ms on ms.MessageID = t.MessageID and t.TransactionID IS NOT NULL
-	LEFT JOIN dbo.MerkleTreeIntermediateNode m 
-		on m.MerkleTreeIntermediateNodeID = CASE WHEN c.MerkleTreeIntermediateNodeID1 IS NOT NULL THEN CASE ComputeSide WHEN 1 THEN c.MerkleTreeIntermediateNodeID1 ELSE c.MerkleTreeIntermediateNodeID2 END END
-		and m.BlockID = @BlockID
-	WHERE c.Depth = 1
+select @NextNodeID = MerkleTreeIntermediateNodeID
+	,@Hash1 = CASE WHEN TransactionID1 = @TransactionID THEN (SELECT ComputedHash FROM CTEMessageHash WHERE TransactionID = @TransactionID) ELSE t1.TransactionHash END
+	,@Hash2 = CASE WHEN TransactionID2 = @TransactionID THEN (SELECT ComputedHash FROM CTEMessageHash WHERE TransactionID = @TransactionID) ELSE t2.TransactionHash END
+	,@NodeHash = n.NodeHash
+from MerkleTreeIntermediateNode n
+JOIN dbo.[Transaction] t1 on t1.TransactionID = TransactionID1
+JOIN dbo.[Transaction] t2 on t2.TransactionID = TransactionID2
+where TransactionID1 = @TransactionID or TransactionID2 = @TransactionID
 
-	UNION ALL
-	
-	--Compute intermediate node hashes one level at a time recursively
-	SELECT c.MerkleTreeIntermediateNodeID
-		,c.MerkleTreeIntermediateNodeID1
-		,c.MerkleTreeIntermediateNodeID2
-		,c.TransactionID1
-		,c.TransactionID2
-		,c.ComputeSide
-		,c.NonComputeSideHash
-		,c.Depth
-		,ComputedHash = CAST(HASHBYTES('SHA2_256',CASE ch.ComputeSide WHEN 1 THEN ch.ComputedHash + ch.NonComputeSideHash ELSE ch.NonComputeSideHash + ch.ComputedHash END) as BINARY(32))
-	FROM CTEComputedHashes ch
-	JOIN CTENecessaryNodes c on c.Depth = ch.Depth + 1
-	WHERE ch.ComputedHash IS NOT NULL
-)
---Compute MerkleRoot
-SELECT TOP 1 @ComputedMerkleRoot = CAST(HASHBYTES('SHA2_256',CASE ComputeSide WHEN 1 THEN ComputedHash + NonComputeSideHash ELSE NonComputeSideHash + ComputedHash END) as BINARY(32)) 
-FROM CTEComputedHashes h
-ORDER BY h.MerkleTreeIntermediateNodeID DESC
+IF @@ROWCOUNT = 0 SET @Exists = 0
 
-SELECT IsInMerkleRoot = CASE WHEN @ComputedMerkleRoot = MerkleRoot THEN 'Yes' ELSE 'No' END
-	,SignatureVerified = CASE 
-		dbo.BlockVerifySignature(BlockID,PrevBlockID,TransactionCount,Nonce,b.MerkleRoot,PrevBlockSignature,CreatedDateTime,SignatureVersion,b.BlockSignature)
-		WHEN 1 THEN 'Yes' ELSE 'No' END
-FROM [Block] b
-WHERE BlockID = @BlockID 
+IF @NodeHash <> HASHBYTES('SHA2_256',@Hash1 + @Hash2) SET @HashFailures = @HashFailures + 1
+
+--Verify down the rest of the tree
+WHILE @IsDone = 0 and @HashFailures = 0
+BEGIN
+	select 
+		@Hash1 = m1.NodeHash
+		,@Hash2 = m2.NodeHash 
+		,@NodeHash = n.NodeHash
+		,@NextNodeID = n.MerkleTreeIntermediateNodeID
+	from MerkleTreeIntermediateNode n
+	JOIN dbo.MerkleTreeIntermediateNode m1 on m1.MerkleTreeIntermediateNodeID = n.MerkleTreeIntermediateNodeID1
+	JOIN dbo.MerkleTreeIntermediateNode m2 on m2.MerkleTreeIntermediateNodeID = n.MerkleTreeIntermediateNodeID2
+	where n.MerkleTreeIntermediateNodeID1 = @NextNodeID or n.MerkleTreeIntermediateNodeID2 = @NextNodeID
+
+	IF @@ROWCOUNT = 0 SET @IsDone = 1
+
+	IF @NodeHash <> HASHBYTES('SHA2_256',@Hash1 + @Hash2) SET @HashFailures = @HashFailures + 1
+
+	--select @HAsh1,@Hash2,@NextNodeID
+END
+
+
+--Verify MerkleRoot and BlockSignature
+IF @HashFailures = 0
+BEGIN
+	DECLARE @BlockID INT 
+	SELECT @BlockID = BlockID
+	FROM [Transaction] 
+	WHERE TransactionID = @TransactionID
+
+	select @IsValid = CASE WHEN HASHBYTES('SHA2_256',@Hash1 + @Hash2) = MerkleRoot 
+		and dbo.BlockVerifySignature(BlockID,PrevBlockID,TransactionCount,Nonce,Difficulty,b.MerkleRoot,PrevBlockSignature,CreatedDateTime,SignatureVersion,b.BlockSignature) 
+			= 1 THEN 1 ELSE 0 END
+	from [Block] b
+	where BlockID = @BlockID
+END
+
+SELECT TransactionID = @TransactionID, IsValid = @IsValid, [Exists] = @Exists

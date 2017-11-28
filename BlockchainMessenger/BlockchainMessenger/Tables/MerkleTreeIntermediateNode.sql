@@ -17,3 +17,23 @@ CHECK
 	OR (TransactionID1 IS NULL and TransactionID2 IS NULL AND MerkleTreeIntermediateNodeID1 IS NOT NULL and MerkleTreeIntermediateNodeID2 IS NOT NULL and Depth > 1)
 )
 GO
+CREATE INDEX NC_TransactionID1 ON [dbo].[MerkleTreeIntermediateNode]
+(
+	TransactionID1
+)
+GO
+CREATE INDEX NC_TransactionID2 ON [dbo].[MerkleTreeIntermediateNode]
+(
+	TransactionID2
+)
+GO
+CREATE INDEX NC_MerkleTreeIntermediateNodeID1 ON [dbo].[MerkleTreeIntermediateNode]
+(
+	MerkleTreeIntermediateNodeID1
+)
+GO
+CREATE INDEX NC_MerkleTreeIntermediateNodeID2 ON [dbo].[MerkleTreeIntermediateNode]
+(
+	MerkleTreeIntermediateNodeID2
+)
+GO

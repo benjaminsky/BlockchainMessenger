@@ -7,6 +7,7 @@ CREATE FUNCTION [dbo].BlockVerifySignature
 	,@PrevBlockID INT
 	,@TransactionCount INT
 	,@Nonce INT
+	,@Difficulty VARBINARY(4)
 	,@MerkleRoot BINARY(32)
 	,@PrevBlockSignature VARBINARY(256)
 	,@CreatedDateTime DATETIMEOFFSET(2)
@@ -23,6 +24,7 @@ BEGIN
 				,@PrevBlockID
 				,@TransactionCount
 				,@Nonce
+				,@Difficulty
 				,@MerkleRoot
 				,@PrevBlockSignature
 				,@CreatedDateTime

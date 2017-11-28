@@ -7,6 +7,7 @@ CREATE FUNCTION [dbo].BlockPlaintextForSignature
 	,@PrevBlockID INT
 	,@TransactionCount INT
 	,@Nonce INT
+	,@Difficulty VARBINARY(4)
 	,@MerkleRoot BINARY(32)
 	,@PrevBlockSignature VARBINARY(256)
 	,@CreatedDateTime DATETIMEOFFSET(2)
@@ -23,6 +24,7 @@ BEGIN
 					+ @Delimiter + ISNULL(CAST(@PrevBlockID AS NVARCHAR(11)),N'')
 					+ @Delimiter + CAST(@TransactionCount AS NVARCHAR(11))
 					+ @Delimiter + CAST(@Nonce AS NVARCHAR(11))
+					+ @Delimiter + ISNULL(CONVERT(NVARCHAR(10),@Difficulty,1),N'')
 					+ @Delimiter + ISNULL(CONVERT(NVARCHAR(66),@MerkleRoot,1),N'')
 					+ @Delimiter + ISNULL(CONVERT(NVARCHAR(514),@PrevBlockSignature,1),N'')
 					+ @Delimiter + ISNULL(CONVERT(NVARCHAR(30),@CreatedDateTime,121),N'')
