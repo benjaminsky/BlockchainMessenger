@@ -20,7 +20,7 @@ BEGIN
 	INSERT INTO @MerkleNodes (ID,Depth,NodeHash,HashID1,HashID2, BlockID)
 	SELECT NEXT VALUE FOR [dbo].[MerkleTreeIntermediateNodeID]
 		, t1.Depth + 1
-		, HASHBYTES('SHA2_256',t1.NodeHash + ISNULL(t2.NodeHash,t1.NodeHash))
+		, HASHBYTES('SHA2_256',HASHBYTES('SHA2_256',t1.NodeHash + ISNULL(t2.NodeHash,t1.NodeHash)))
 		, t1.ID
 		, ISNULL(t2.ID,t1.ID)
 		, t1.BlockID

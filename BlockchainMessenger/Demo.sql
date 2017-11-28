@@ -61,7 +61,7 @@ EXEC  [dbo].[MessageAdd] 1001,1000,'RE: Followup','Thanks! Enjoy your weekend.'
 WAITFOR DELAY '00:00:00.300'
 
 EXEC BlockAdd
-EXEC BlockMine 0x07
+EXEC BlockMine 0x01
 
 EXEC  [dbo].[MessageAdd] 1000,1001,'Test','This will be a single message for this block'
 
@@ -92,7 +92,7 @@ UPDATE [Message]
 set Body = 'This has been tampered with...'
 where MessageID = 10006
 
-EXEC TransactionVerify 20010
+EXEC TransactionVerify 20001
 EXEC TransactionVerify 20011
 EXEC TransactionVerify 999999
 

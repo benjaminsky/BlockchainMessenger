@@ -35,7 +35,7 @@ where TransactionID1 = @TransactionID or TransactionID2 = @TransactionID
 
 IF @@ROWCOUNT = 0 SET @Exists = 0
 
-IF @NodeHash <> HASHBYTES('SHA2_256',@Hash1 + @Hash2) SET @HashFailures = @HashFailures + 1
+IF @NodeHash <> HASHBYTES('SHA2_256',HASHBYTES('SHA2_256',@Hash1 + @Hash2)) SET @HashFailures = @HashFailures + 1
 
 --Verify down the rest of the tree
 WHILE @IsDone = 0 and @HashFailures = 0
@@ -52,7 +52,7 @@ BEGIN
 
 	IF @@ROWCOUNT = 0 SET @IsDone = 1
 
-	IF @NodeHash <> HASHBYTES('SHA2_256',@Hash1 + @Hash2) SET @HashFailures = @HashFailures + 1
+	IF @NodeHash <> HASHBYTES('SHA2_256',HASHBYTES('SHA2_256',@Hash1 + @Hash2)) SET @HashFailures = @HashFailures + 1
 
 	--select @HAsh1,@Hash2,@NextNodeID
 END
@@ -66,7 +66,7 @@ BEGIN
 	FROM [Transaction] 
 	WHERE TransactionID = @TransactionID
 
-	select @IsValid = CASE WHEN HASHBYTES('SHA2_256',@Hash1 + @Hash2) = MerkleRoot 
+	select @IsValid = CASE WHEN HASHBYTES('SHA2_256',HASHBYTES('SHA2_256',@Hash1 + @Hash2)) = MerkleRoot 
 		and dbo.BlockVerifySignature(BlockID,PrevBlockID,TransactionCount,Nonce,Difficulty,b.MerkleRoot,PrevBlockSignature,CreatedDateTime,SignatureVersion,b.BlockSignature) 
 			= 1 THEN 1 ELSE 0 END
 	from [Block] b
