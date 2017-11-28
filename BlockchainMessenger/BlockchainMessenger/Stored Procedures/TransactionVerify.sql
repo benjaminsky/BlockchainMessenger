@@ -3,6 +3,8 @@
 	@TransactionID INT
 )
 AS
+SET NOCOUNT ON
+
 DECLARE @NextNodeID INT
 	,@Hash1 BINARY(32)
 	,@Hash2 BINARY(32)
@@ -53,8 +55,6 @@ BEGIN
 	IF @@ROWCOUNT = 0 SET @IsDone = 1
 
 	IF @NodeHash <> HASHBYTES('SHA2_256',HASHBYTES('SHA2_256',@Hash1 + @Hash2)) SET @HashFailures = @HashFailures + 1
-
-	--select @HAsh1,@Hash2,@NextNodeID
 END
 
 

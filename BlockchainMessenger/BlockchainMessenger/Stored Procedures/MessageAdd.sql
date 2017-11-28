@@ -6,39 +6,29 @@
 	,@MessageID INT = NULL
 AS
 SET XACT_ABORT ON
+DECLARE @InternalMessageID INT
+	, @TransactionHash BINARY(32) 
+	,@HashVersion INT = 1 --Just hardcoding for now...
+	,@TransactionDateTime DATETIMEOFFSET(2) = SYSDATETIMEOFFSET()
 
 /* Allow either passing in @MessageID or grabbing next from sequence */
-DECLARE @InternalMessageID INT
-
 IF @MessageID IS NULL
 	SET @InternalMessageID = NEXT VALUE FOR dbo.MessageID
 ELSE
 	SET @InternalMessageID = @MessageID
 
-/* Hash section */
-DECLARE @TransactionHash BINARY(32) 
-	,@PrevTransactionID INT
-	,@PrevTransactionHash BINARY(32)
-	,@HashVersion INT = 1 --Just hardcoding for now...
-	,@TransactionDateTime DATETIMEOFFSET(2) = SYSDATETIMEOFFSET()
+/* get hash */
+SET @TransactionHash = dbo.MessageComputeHash(
+	@InternalMessageID
+	,@FromUserID
+	,@ToUserID
+	,@Subject
+	,@Body
+	,@TransactionDateTime
+	,@HashVersion)
 
 BEGIN TRAN
-	SELECT TOP 1
-		 @PrevTransactionID = TransactionID
-		 ,@PrevTransactionHash = TransactionHash
-	FROM dbo.[Transaction]
-	ORDER BY TransactionID DESC
-
-	SET @TransactionHash = dbo.MessageComputeHash(
-		@InternalMessageID
-		,@FromUserID
-		,@ToUserID
-		,@Subject
-		,@Body
-		,@TransactionDateTime
-		,@HashVersion)
-
-	/* INSERT and RETURN */
+	/* INSERT */
 	INSERT INTO dbo.[Message] (MessageID, ToUserID,FromUserID, [Subject], Body)
 	VALUES (@InternalMessageID, @ToUserID,@FromUserID,@Subject, @Body)
 

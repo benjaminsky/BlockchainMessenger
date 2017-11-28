@@ -3,10 +3,13 @@
 	,@MerkleRoot BINARY(32) OUTPUT
 AS
 SET NOCOUNT ON
+
 DECLARE @HashVersion INT = 1 --Just hardcoding for now...
+	, @RC INT
+DECLARE @MerkleNodes TABLE(RN INT IDENTITY(1,1) PRIMARY KEY, ID INT, Depth TINYINT,NodeHash BINARY(32), HashID1 INT, HashID2 INT, BlockID INT)	
+
 
 --This table will hold all MerkleNodes but first we prepop it with just the leaves
-DECLARE @MerkleNodes TABLE(RN INT IDENTITY(1,1) PRIMARY KEY, ID INT, Depth TINYINT,NodeHash BINARY(32), HashID1 INT, HashID2 INT, BlockID INT)	
 INSERT INTO @MerkleNodes (Depth, NodeHash, ID, BlockID)
 SELECT 0,TransactionHash,TransactionID, BlockID
 FROM dbo.[Transaction]
@@ -14,7 +17,6 @@ WHERE BlockID = @BlockID
 
 
 --Walk down the tree populating @MerkleNodes one depth at a time until we've written the root
-DECLARE @RC INT
 WHILE @RC > 1 or @RC IS NULL
 BEGIN
 	INSERT INTO @MerkleNodes (ID,Depth,NodeHash,HashID1,HashID2, BlockID)
