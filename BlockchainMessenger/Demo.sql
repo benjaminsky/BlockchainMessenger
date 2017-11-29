@@ -61,31 +61,28 @@ EXEC  [dbo].[MessageAdd] 1001,1000,'RE: Followup','Thanks! Enjoy your weekend.'
 WAITFOR DELAY '00:00:00.300'
 
 EXEC BlockAdd
-EXEC BlockMine 0x01
+EXEC BlockMine 0x06
 
-EXEC  [dbo].[MessageAdd] 1000,1001,'Test','This will be a single message for this block'
+EXEC  [dbo].[MessageAdd] 1000,1001,'Test','This will be a single message block'
 
 EXEC BlockAdd
 EXEC BlockMine 0x07
 
 DECLARE @i INT = 0
 SET NOCOUNT ON
-while @i < 50000
-begin
-	SET @i = @i + 1
-	DECLARE @Body VARCHAR(1000) = 'There will be a ton of messages on this block and this is number ' + CAST(@i AS VARCHAR(11))
-	EXEC  [dbo].[MessageAdd] 1000,1001,'Test', @Body
-end
+SET XACT_ABORT ON
+begin tran
+	while @i < 50000
+	begin
+		SET @i = @i + 1
+		DECLARE @Body VARCHAR(1000) = 'There will be a ton of messages on this block and this is number ' + CAST(@i AS VARCHAR(11))
+		EXEC [dbo].[MessageAdd] 1000,1001,'Test', @Body
+	end
+commit
 SET NOCOUNT OFF
 
 EXEC BlockAdd
 EXEC BlockMine 0x07
-
-select * from [User]
-select * from [Message]
-select * from [Transaction]
-SELECT * FROM [Block]
-select * from MerkleTreeIntermediateNode
 
 --Mess with something...
 UPDATE [Message]
@@ -93,10 +90,10 @@ set Body = 'This has been tampered with...'
 where MessageID = 10006
 
 EXEC TransactionVerify 20001
-EXEC TransactionVerify 20011
+EXEC TransactionVerify 20011 --MessageID = 10006
 EXEC TransactionVerify 999999
 
---Script to verify random 100 transactions
+/* Script to verify random 100 transactions
 SELECT 'DECLARE @Verifications TABLE (TransactionID INT,IsValid BIT, [Exists] BIT)'
 UNION ALL
 select * from (
@@ -105,5 +102,11 @@ select * from (
 ) i
 UNION ALL
 SELECT 'SELECT * FROM @Verifications'
+--*/
 
 
+select * from [User]
+select * from [Message]
+select * from [Transaction]
+SELECT * FROM [Block]
+select * from MerkleTreeIntermediateNode
