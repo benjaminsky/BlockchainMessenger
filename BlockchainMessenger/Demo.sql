@@ -1,10 +1,5 @@
 /* clear */
-DELETE [Message]
-DELETE [User]
-
-ALTER SEQUENCE dbo.MessageID RESTART
-ALTER SEQUENCE dbo.UserID RESTART
-
+EXEC StartFromScratch
 
 /* create users */
 DECLARE @UserID INT
@@ -29,3 +24,9 @@ WAITFOR DELAY '00:00:00.300'
 
 select * from [User]
 select * from [Message]
+
+/* Verify */
+select MessageID
+	,ComputedMessageHash = [dbo].[MessageComputeHash](MessageID,FromUSerID,ToUserID,[Subject],Body, PrevMessageHash,HashVersion)
+	,MessageHash
+From [Message]

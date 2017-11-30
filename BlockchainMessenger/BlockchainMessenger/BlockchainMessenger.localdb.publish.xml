@@ -5,7 +5,7 @@
     <TargetDatabaseName>BlockchainMessenger</TargetDatabaseName>
     <DeployScriptFileName>BlockchainMessenger.sql</DeployScriptFileName>
     <TargetConnectionString>Data Source=(localdb)\ProjectsV13;Integrated Security=True;Persist Security Info=False;Pooling=False;MultipleActiveResultSets=False;Connect Timeout=60;Encrypt=False;TrustServerCertificate=True</TargetConnectionString>
-    <BlockOnPossibleDataLoss>True</BlockOnPossibleDataLoss>
+    <BlockOnPossibleDataLoss>False</BlockOnPossibleDataLoss>
     <GenerateSmartDefaults>True</GenerateSmartDefaults>
     <ProfileVersionNumber>1</ProfileVersionNumber>
     <BlockWhenDriftDetected>False</BlockWhenDriftDetected>
