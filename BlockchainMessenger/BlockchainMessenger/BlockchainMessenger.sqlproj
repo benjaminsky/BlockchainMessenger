@@ -79,6 +79,7 @@
     <Build Include="Tables\TransactionType.sql" />
     <Build Include="Functions\MessageReadComputeHash.sql" />
     <Build Include="Stored Procedures\MessageMarkUnread.sql" />
+    <Build Include="Stored Procedures\StartFromScratch.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="BlockchainMessenger.localdb.publish.xml" />
