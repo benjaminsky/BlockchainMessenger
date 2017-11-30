@@ -72,6 +72,7 @@
     <Build Include="Stored Procedures\MessageAdd.sql" />
     <Build Include="Stored Procedures\MessageMarkRead.sql" />
     <Build Include="Functions\MessageComputeHash.sql" />
+    <Build Include="Stored Procedures\StartFromScratch.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="BlockchainMessenger.localdb.publish.xml" />
