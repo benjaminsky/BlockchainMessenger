@@ -1,12 +1,5 @@
 /* clear */
-DELETE [Transaction]
-DELETE [Message]
-DELETE [User]
-
-ALTER SEQUENCE dbo.MessageID RESTART
-ALTER SEQUENCE dbo.UserID RESTART
-ALTER SEQUENCE dbo.TransactionID RESTART
-
+EXEC StartFromScratch
 
 /* create users */
 DECLARE @UserID INT
@@ -37,4 +30,23 @@ select * from [User]
 select * from [Message]
 select * from [Transaction]
 
+/* this is how the hash in computed */
 SELECT HASHBYTES('SHA2_256',N'10000<bcfield>2017-11-26 17:24:01.40 -08:00<bcfield>2017-11-26 17:24:01.40 -08:00<bcfield>0x412632EA5D535712AD71648EB5048ED6A882819D428F59AF7957422CD469C854')
+
+
+/* Verify */
+select m.MessageID
+	,ComputedMessageHash = [dbo].[MessageComputeHash](m.MessageID,FromUserID,ToUserID,[Subject],Body,t.TransactionDateTime, t.PrevTransactionHash, t.HashVersion)
+	,t.TransactionHash
+From [Message] m
+JOIN [Transaction] t on t.MessageID = m.MessageID
+	and t.TransactionTypeID = 1
+
+select m.MessageID
+	,ComputedMessageHash = [dbo].[MessageReadComputeHash](m.MessageID,t.TransactionDateTime,t.PrevTransactionHash, t.HashVersion)
+	,t.TransactionHash
+From [Message] m
+JOIN [Transaction] t on t.MessageID = m.MessageID
+	and t.TransactionTypeID in (2,3)
+
+
